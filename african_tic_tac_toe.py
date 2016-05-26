@@ -1,4 +1,13 @@
-N = 3
+'''
+Small game for teaching semi-functional-way in Python
+
+Rules: two players, like Tic-Tac-Toe, but after three turns by each player
+you can't make new marks and you may only move placed marks on neighbors cells.
+Coordinates like "2 1" or "21", where 2 is row and 1 is column,
+enumerated from zero.
+'''
+
+N = 3  # You can change it in [3..9]
 
 O = 1
 X = 2
