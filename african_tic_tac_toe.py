@@ -12,7 +12,7 @@ N = 3  # You can change it in [3..9]
 O = 1
 X = 2
 
-state = tuple([tuple([0 for _ in range(N)]) for _ in range(N)])
+state = (((0,) * N,) * N)
 
 
 def put(state, x, y, new):
