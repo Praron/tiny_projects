@@ -105,7 +105,7 @@ def next_gen(arr, p1=(0, 0), p2=(W, H)):
             if not WRAP:
                 def f(n):
                     try:
-                        if n[0] < 0 or n[1] < 0 or n[0] > W or n[1] > H:
+                        if n[0] < 0 or n[1] < 0 or n[0] > W + 1 or n[1] > H + 1:
                             return 0
                         return arr[n[0]][n[1]] == 1
                     except IndexError:
@@ -124,21 +124,6 @@ def next_gen(arr, p1=(0, 0), p2=(W, H)):
         debug('---')
         debug(list_2d_to_str(get_2d_slice(new_arr, p1, p2)))
     return new_arr
-
-
-# def next_state(old_state, p1=(0, 0), p2=(W, H)):
-#     # if BORDERLESS_GEN:
-#     #     p1 = (p1[0] - 1, p1[1] - 1)
-#     #     p2 = (p2[0] + 1, p2[1] + 1)
-#     if p1 != (0, 0) or p2 != (W, H):
-#         p2 = (min(p2[0] + 1, W - 1), min(p2[1] + 1, H - 1))
-#     changing_part = next_gen(get_2d_slice(old_state, p1, p2))
-#     # debug(to_str(get_2d_slice(old_state, p1, p2)))
-#     # debug(to_str(next_gen(get_2d_slice(old_state, p1, p2))))
-#     # if BORDERLESS_GEN:
-#     #     changing_part = get_2d_slice(changing_part, (p1[0] + 1, p1[1] + 1), (p2[0] - 1, p2[1] - 1))
-#     state = insert_2d_list(old_state, changing_part, p1)
-#     return state
 
 
 def draw_state(scr, state):
@@ -213,7 +198,7 @@ def input_point(scr, state, sel_point=None):
 def input_selection(scr, state):
     p1 = input_point(scr, state)
     p2 = input_point(scr, state, p1)
-    p2 = (min(p2[0] + 1, W - 1), min(p2[1] + 1, H - 1))
+    p2 = (min(p2[0] + 1, W), min(p2[1] + 1, H))
     return sorted((p1, p2), key=lambda p: p[0])
 
 
