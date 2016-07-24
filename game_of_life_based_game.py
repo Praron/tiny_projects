@@ -29,7 +29,7 @@ H = 10
 # H = 12
 
 WRAP = False
-BORDERLESS_GEN = True
+ONLY_IN_SEL = True
 
 
 def init_pairs():
@@ -72,46 +72,31 @@ def list_2d_to_str(arr):
 
 def get_2d_slice(arr, p1, p2):
     return [arr[row][p1[1]:p2[1]] for row in range(p1[0], p2[0])]
-    # return [arr[row][p1[1]:p2[1] + 1] for row in range(p1[0], p2[0] + 1)]
 
 
-# def insert_2d_list(origin, source, start):
-#     new_list = deepcopy(origin)
-#     h, w = len(source[0]), len(source)
-#     for y in range(h):
-#         for x in range(w):
-#             new_list[start[0] + x][start[1] + y] = source[x][y]
-#     return new_list
-
-
-def next_gen(arr, p1=(0, 0), p2=(W, H)):
+def next_state(arr, p1=(0, 0), p2=(W, H)):
     w, h = p2[0] - p1[0], p2[1] - p1[1]
-    # w, h = len(arr), len(arr[0])
     new_arr = deepcopy(arr)
-    if p1 != (0, 0):
-        debug(to_str('w, h: ', w, h))
-        debug(to_str('points: ', p1, p2))
-        debug(list_2d_to_str(get_2d_slice(arr, p1, p2)))
-    # new_arr = [[0] * H for _ in range(W)]
-    # new_arr = [[0] * h for _ in range(w)]
+
     for y in range(p1[1], p2[1]):
         for x in range(p1[0], p2[0]):
             neighbors = [(x + dx, y + dy)
                          for dx in [-1, 0, 1] for dy in [-1, 0, 1]
                          if not dx == dy == 0]
-            # live_neighbors = len(list(filter(lambda n:
-            #                                  arr[n[0] % w][n[1] % h] == 1,
-            #                                  neighbors)))
-            if not WRAP:
+            if WRAP:
+                def f(n):
+                    return arr[n[0] % w][n[1] % h] == 1
+                live_neighbors = len(list(filter(f, neighbors)))
+            else:
                 def f(n):
                     try:
-                        if n[0] < 0 or n[1] < 0 or n[0] > W + 1 or n[1] > H + 1:
-                            return 0
+                        if (n[0] < p1[0] or n[1] < p1[1] or
+                             n[0] >= p2[0] or n[1] >= p2[1]):
+                            return False
                         return arr[n[0]][n[1]] == 1
                     except IndexError:
                         return False
-                # f = (lambda n: arr[clamp(0, n[0], w)][clamp(0, n[1], h)] == 1)
-                     # if n[0] in range(w) and n[1] in range(h) else False)
+
                 live_neighbors = len(list(filter(f, neighbors)))
 
             if live_neighbors == 3 or (arr[x][y] == 1 and live_neighbors == 2):
@@ -135,7 +120,7 @@ def draw_state(scr, state):
 
 
 def draw_hint(scr, state):
-    hint = next_gen(state)
+    hint = next_state(state)
     for y in range(H):
         for x in range(W):
             ch = '#' if hint[x][y] == 1 else ' '
@@ -162,25 +147,13 @@ def input_point(scr, state, sel_point=None):
         scr.addch(y, x, '@', CURSOR_PAIR)
 
         if sel_point is not None:
-            # x_fix = 1 if sel_point[0] - x < 0 else 0
-            # y_fix = 1 if sel_point[1] - y < 0 else 0
-            # x_fix = 0
-            # y_fix = 0
-            hint = next_gen(state)
-            # for sel_y in range(*sorted([sel_point[1] + flip(y_fix),
-            #                             min([y + y_fix, H])])):
-            #     for sel_x in range(*sorted([sel_point[0] + flip(x_fix),
-            #                                 min([x + x_fix, W])])):
+            hint = next_state(state)
             hor = sorted([sel_point[0], min([x, W])])
             hor[1] = hor[1] + 1
             ver = sorted([sel_point[1], min([y, H])])
             ver[1] = ver[1] + 1
             for sel_y in range(*ver):
                 for sel_x in range(*hor):
-            # for sel_y in range(*sorted([sel_point[1],
-            #                             min([y, H])])):
-                # for sel_x in range(*sorted([sel_point[0],
-                #                             min([x, W])])):
                     scr.addch(sel_y, sel_x, '#' if hint[sel_x][sel_y] == 1
                               else '%' if state[sel_x][sel_y] == 1 else ' ',
                               CURSOR_PAIR)
@@ -198,8 +171,9 @@ def input_point(scr, state, sel_point=None):
 def input_selection(scr, state):
     p1 = input_point(scr, state)
     p2 = input_point(scr, state, p1)
+    p1, p2 = sorted((p1, p2), key=lambda p: p[0])
     p2 = (min(p2[0] + 1, W), min(p2[1] + 1, H))
-    return sorted((p1, p2), key=lambda p: p[0])
+    return (p1, p2)
 
 
 def main(stdscr):
@@ -217,12 +191,10 @@ def main(stdscr):
             state = [[randint(0, 1) for row in range(H)] for col in range(W)]
         if key == 'a':
             p1, p2 = input_selection(stdscr, state)
-            state = next_gen(state, p1, p2)
-            # state = next_state(state, p1, p2)
+            state = next_state(state, p1, p2)
 
         if key == 'z':
-            # state = next_state(state)
-            state = next_gen(state)
+            state = next_state(state)
 
 
 if __name__ == '__main__':
